@@ -22,10 +22,10 @@ jobs:
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
           # taken to be the root directory of the workspace.
-          root: ./
+          root: /tmp/workspace
           # Must be relative path from root
           paths:
-            - /tmp/workspace/_site
+            - /_site
             
 
   deploy:
@@ -34,7 +34,7 @@ jobs:
     resource_class: medium
     steps:
        - attach_workspace:
-            at: ./
+            at: /tmp/workspace
             
        - add_ssh_keys:
           fingerprints:
