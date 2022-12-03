@@ -17,7 +17,7 @@ jobs:
       - run: ruby --version
       - run: bundle init
       - run: bundle exec jekyll serve
-      
+  
       # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
@@ -37,7 +37,7 @@ jobs:
       image: ubuntu-2004:current
     resource_class: medium
     steps:
-        - attach_workspace:
+       - attach_workspace:
             at: /tmp/workspace/_site
             
        - add_ssh_keys:
