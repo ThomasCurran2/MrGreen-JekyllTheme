@@ -5,22 +5,57 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  say-hello:
+  build:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
-      - image: cimg/base:stable
+      - image: cimg/ruby:3.1.2
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+      - run: ruby --version
+      - run: bundle init
+      - run: bundle exec jekyll serve
+      
+  flow:
+    executor: my-executor
+    steps:
+      - run: mkdir -p workspace
+      - run: echo "Hello, world!" > workspace/echo-output
 
+      # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
+      - persist_to_workspace:
+          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
+          # taken to be the root directory of the workspace.
+          root: /_site
+          # Must be relative path from root
+          paths:
+            - assets
+            - ja
+            - posts
+            - pt
+            - query
+            - tabs
+
+  deploy:
+    machine:
+      image: ubuntu-2004:current
+    resource_class: medium
+    steps:
+       - add_ssh_keys:
+          fingerprints:
+            - "16:ab:8a:9d:2b:8e:a4:a1:fd:b8:e3:f3:d5:8b:0e:65"
+       - run:
+            name: Deploy Over SSH
+            command: |
+              ssh -o StrictHostKeyChecking=no circleci@148.100.77.135 "sudo touch /tmp/testing.txt"
 # Invoke jobs via workflows
+        - attach_workspace:
+            at: /workspace
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
-    jobs:
-      - say-hello
+    build-and-deploy:
+      jobs:
+          # - build
+          - deploy
